@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="POS คลินิก">
+    
+    <!-- เปลี่ยนไอคอนเป็นรูปแคปซูลยา 💊 -->
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%23f97316'/><g transform='rotate(45 50 50)'><rect x='30' y='20' width='40' height='60' rx='20' fill='none' stroke='white' stroke-width='8'/><path d='M 30 50 L 30 40 A 20 20 0 0 1 70 40 L 70 50 Z' fill='white'/></g></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f97316'/><g transform='rotate(45 50 50)'><rect x='30' y='20' width='40' height='60' rx='20' fill='none' stroke='white' stroke-width='8'/><path d='M 30 50 L 30 40 A 20 20 0 0 1 70 40 L 70 50 Z' fill='white'/></g></svg>">
+
+    <title>Mini POS - นิธิรัชต์จักษุคลินิก</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= UI ธีมส้มพีชพาสเทล โมเดิร์น ================= */
+        body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #ffedd5 0%, #ffe4e6 100%); background-attachment: fixed; margin: 0; padding: 20px; color: #334155; }
+        .app-container { max-width: 800px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 35px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 40px; border: 1px solid rgba(255,255,255,0.8); position: relative; }
+        .header-title { text-align: center; margin-bottom: 30px; position: relative; }
+        .header-title h1 { margin: 0; background: linear-gradient(135deg, #ea580c, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; font-weight: 700; }
+        .header-title p { margin: 5px 0 0 0; color: #64748b; font-size: 16px; font-weight: 500; }
+        
+        .btn-settings { position: absolute; top: 0; right: 0; background: #fff7ed; border: 1px solid #fed7aa; color: #ea580c; padding: 8px 15px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-settings:hover { background: #ffedd5; transform: scale(1.05); }
+
+        .section-box { background: #ffffff; padding: 25px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #fff7ed; border-top: 5px solid #f97316; transition: transform 0.2s; }
+        .section-box:hover { transform: translateY(-2px); }
+        .section-title { font-weight: 700; color: #0f172a; margin-bottom: 20px; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+        .badge-orange { background: #ffedd5; color: #ea580c; padding: 5px 12px; border-radius: 12px; font-size: 16px;}
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; color: #475569; font-size: 14px;}
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px 16px; background-color: #f8fafc; border: 2px solid transparent; border-radius: 12px; font-size: 16px; box-sizing: border-box; font-family: 'Sarabun', sans-serif; color: #1e293b; transition: all 0.3s ease; }
+        input:focus { outline: none; background-color: #ffffff; border-color: #fb923c; box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.15); }
+        .highlight-input { background: #fff7ed !important; color: #ea580c !important; border-color: #ffedd5 !important; font-weight: bold;}
+        .flex-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .flex-1 { flex: 1; min-width: 150px; }
+        .item-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .item-index { font-weight: bold; color: #94a3b8; width: 20px; text-align: center; }
+        .item-name { flex: 3; }
+        .item-price { flex: 1; }
+        
+        .btn-group { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;}
+        .btn { flex: 1; min-width: 180px; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
+        .btn:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-line { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .btn-bill { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .btn-clear { background: linear-gradient(135deg, #94a3b8, #64748b); flex: 0.3; min-width: 120px;}
+        .alert-box { display: none; background-color: #dcfce7; color: #166534; padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-weight: bold; border: 1px solid #bbf7d0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .total-box { background: #fff7ed; border: 2px dashed #fdba74; padding: 15px 20px; border-radius: 12px; text-align: right; margin-top: 20px; }
+        .total-text { font-size: 16px; color: #ea580c; font-weight: 600; }
+        .total-amount { font-size: 32px; font-weight: 700; color: #c2410c; margin-left: 10px; }
+
+        /* ================= Modal จัดการคลังยา ================= */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #94a3b8; background: none; border: none; }
+        .modal-close:hover { color: #ef4444; }
+        .med-list-container { margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 10px; max-height: 300px; overflow-y: auto; }
+        .med-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #f1f5f9; }
+        .med-item:last-child { border-bottom: none; }
+        .btn-add-med { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; height: 100%; }
+        .btn-add-med:active { transform: scale(0.95); }
+        .btn-delete-med { background: #fee2e2; color: #ef4444; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-delete-med:hover { background: #fecaca; }
+
+        .preview-wrapper { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-start; }
+        .preview-column { display: flex; flex-direction: column; align-items: center; }
+        .preview-title { font-size: 16px; font-weight: 700; color: #475569; margin-bottom: 15px; background: rgba(255,255,255,0.8); padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); backdrop-filter: blur(5px);}
+        .paper-preview { background: white; box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden;}
+
+        /* ================= สไตล์กระดาษใบเสร็จ (A5) ================= */
+        #print-bill, #preview-bill { width: 210mm; height: 148mm; box-sizing: border-box; display: flex; background: white; color: black; font-family: 'Sarabun', sans-serif;}
+        .bill-half { flex: 1; width: 50%; height: 100%; padding: 8mm; box-sizing: border-box; position: relative; display: flex; flex-direction: column; }
+        .bill-half:first-child { border-right: 1px dashed #999; }
+        .doc-type-badge { position: absolute; top: 8mm; right: 8mm; border: 1px solid #000; padding: 2px 6px; font-size: 10px; font-weight: bold; border-radius: 4px; }
+        .b-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; }
+        .b-title { font-size: 16px; font-weight: bold; }
+        .b-clinic { font-size: 14px; font-weight: bold; margin-top: 2px; }
+        .b-addr { font-size: 10px; color: #333; }
+        .b-meta { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 8px; }
+        .b-patient { font-size: 12px; margin-bottom: 10px; border-bottom: 1px dotted #ccc; padding-bottom: 5px; line-height: 1.5; }
+        .b-patient-sub { font-size: 10px; color: #555; }
+        .b-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 10px; flex: 1; }
+        .b-table th { border-bottom: 1px solid #000; padding: 4px 0; text-align: left; }
+        .b-table td { padding: 4px 0; }
+        .b-table .price-col { text-align: right; width: 60px; }
+        .b-total-row { border-top: 2px solid #000; font-weight: bold; font-size: 14px; }
+        .b-thai-text { text-align: right; font-size: 10px; font-style: italic; margin-top: 5px; color: #555; }
+        .b-sign { text-align: center; font-size: 10px; margin-top: auto; }
+        .print-only { display: none; }
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .app-container, .preview-title { display: none !important; }
+            .preview-wrapper { margin: 0; gap: 0; display: block; }
+            .paper-preview { box-shadow: none !important; border-radius: 0; margin: 0; page-break-after: always; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ซ่อนรายชื่อยาไว้เบื้องหลัง -->
+    <datalist id="medList"></datalist>
+
+    <div class="app-container">
+        <div class="header-title">
+            <button type="button" class="btn-settings" onclick="openMedModal()">⚙️ จัดการคลังยา</button>
+            <h1>🛒 ระบบขายยาหน้าร้าน</h1>
+            <p>นิธิรัชต์จักษุคลินิก (เฉพาะคนไข้เดิม)</p>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title"><span class="badge-orange">1</span> <span>ข้อมูลคนไข้เดิม</span></div>
+            <div class="flex-row">
+                <div class="form-group flex-1">
+                    <label>วันที่ (พ.ศ.):</label>
+                    <input type="text" id="inputDate" placeholder="วว/ดด/พศศศ" maxlength="10" oninput="formatDateInput(this, event); syncData()">
+                </div>
+                <div class="form-group flex-1">
+                    <label>เลขที่บิล (No.):</label>
+                    <input type="text" id="inputNo" placeholder="Auto Generate" oninput="syncData()">
+                </div>
+                <div class="form-group flex-1">
+                    <label>CN (เลขคนไข้):</label>
+                    <input type="text" id="inputCN" class="highlight-input" placeholder="ถอดรหัสอัตโนมัติ" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ชื่อ-นามสกุล (เว้นวรรคด้วยนะ):</label>
+                <input type="text" id="inputName" placeholder="เช่น กฤตภาส รักดี" oninput="autoGenerateSecretCN(); syncData()">
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title"><span class="badge-orange">2</span> <span>รายการสินค้า / ยา</span></div>
+            <div id="itemsContainer">
+                <div class="item-row"><span class="item-index">1.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
+                <div class="item-row"><span class="item-index">2.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
+                <div class="item-row"><span class="item-index">3.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
+                <div class="item-row"><span class="item-index">4.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
+                <div class="item-row"><span class="item-index">5.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
+            </div>
+            
+            <div class="total-box">
+                <span class="total-text">ยอดรวมทั้งสิ้น:</span>
+                <span class="total-amount" id="uiTotal">0</span> <span class="total-text">บาท</span>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" class="btn-line" onclick="copyToLine()">💬 ส่งยอดเข้า LINE คลินิก</button>
+            <button type="button" class="btn-bill" onclick="printBill()">🖨️ พิมพ์ใบเสร็จรับเงิน (A5)</button>
+            <button type="button" class="btn-clear" onclick="resetForm()">🗑️ ล้างหน้าจอใหม่</button>
+        </div>
+        <div id="alertSuccess" class="alert-box">✅ คัดลอกยอดขายแล้ว! นำไปวางใน LINE ได้เลย</div>
+    </div>
+
+    <!-- ================= Modal จัดการคลังยา ================= -->
+    <div class="modal-overlay" id="medModal">
+        <div class="modal-content">
+            <button type="button" class="modal-close" onclick="closeMedModal()">✖</button>
+            <h2 style="margin-top:0; color:#ea580c;">⚙️ จัดการคลังยา (เพิ่ม/ลบ)</h2>
+            <p style="color:#64748b; font-size:14px;">เพิ่มชื่อยาและราคาไว้ล่วงหน้า พิมพ์ปุ๊บ ราคาเด้งปั๊บ!</p>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <input type="text" id="newMedName" placeholder="ชื่อยา (เช่น Naphcon A)" style="flex: 2;">
+                <input type="number" id="newMedPrice" placeholder="ราคา" style="flex: 1;">
+                <button type="button" class="btn-add-med" onclick="addNewMed()">+ เพิ่ม</button>
+            </div>
+
+            <div class="med-list-container" id="uiMedList">
+                <!-- รายการยาจะถูกโหลดมาใส่ตรงนี้ -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LIVE PREVIEW & PRINT SECTION ================= -->
+    <div class="preview-wrapper">
+        <div class="preview-column">
+            <div class="preview-title">📄 Preview: ใบเสร็จรับเงิน (A5 แนวนอน 2 คอลัมน์)</div>
+            <div id="preview-bill" class="paper-preview">
+                <div class="bill-half">
+                    <div class="doc-type-badge">ต้นฉบับ Original</div>
+                    <div class="b-header">
+                        <div class="b-title">บิลเงินสด / ใบเสร็จรับเงิน</div>
+                        <div class="b-clinic">นิธิรัชต์จักษุคลินิก</div>
+                        <div class="b-addr">4/6 หมู่ 12 ต.ยางซ้าย อ.เมือง จ.สุโขทัย โทร: 061-451-9866</div>
+                    </div>
+                    <div class="b-meta">
+                        <span>เลขที่: <b class="dispNo"></b></span>
+                        <span>วันที่: <b class="dispDate"></b></span>
+                    </div>
+                    <div class="b-patient">
+                        <b>ได้รับเงินจาก:</b> <span class="dispName"></span><br>
+                        <div class="b-patient-sub"><b>CN:</b> <span class="dispCN"></span></div>
+                    </div>
+                    <table class="b-table">
+                        <thead><tr><th>รายการสินค้า (Description)</th><th class="price-col">จำนวนเงิน</th></tr></thead>
+                        <tbody class="dispBillItems"></tbody>
+                        <tbody>
+                            <tr><td colspan="2" style="border-top: 1px solid #000; padding:2px;"></td></tr>
+                            <tr class="b-total-row"><td>รวมเป็นเงินทั้งสิ้น</td><td class="price-col dispTotal">0</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="b-thai-text">(<span class="dispThaiText">ศูนย์บาทถ้วน</span>)</div>
+                    <div class="b-sign">ผู้รับเงิน ........................................<br>(นิธิรัชต์จักษุคลินิก)</div>
+                </div>
+
+                <div class="bill-half">
+                    <div class="doc-type-badge" style="color:#555; border-color:#555;">สำเนา Copy</div>
+                    <div class="b-header">
+                        <div class="b-title">บิลเงินสด / ใบเสร็จรับเงิน</div>
+                        <div class="b-clinic">นิธิรัชต์จักษุคลินิก</div>
+                        <div class="b-addr">4/6 หมู่ 12 ต.ยางซ้าย อ.เมือง จ.สุโขทัย โทร: 061-451-9866</div>
+                    </div>
+                    <div class="b-meta">
+                        <span>เลขที่: <b class="dispNo"></b></span>
+                        <span>วันที่: <b class="dispDate"></b></span>
+                    </div>
+                    <div class="b-patient">
+                        <b>ได้รับเงินจาก:</b> <span class="dispName"></span><br>
+                        <div class="b-patient-sub"><b>CN:</b> <span class="dispCN"></span></div>
+                    </div>
+                    <table class="b-table">
+                        <thead><tr><th>รายการสินค้า (Description)</th><th class="price-col">จำนวนเงิน</th></tr></thead>
+                        <tbody class="dispBillItems"></tbody>
+                        <tbody>
+                            <tr><td colspan="2" style="border-top: 1px solid #000; padding:2px;"></td></tr>
+                            <tr class="b-total-row"><td>รวมเป็นเงินทั้งสิ้น</td><td class="price-col dispTotal">0</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="b-thai-text">(<span class="dispThaiText">ศูนย์บาทถ้วน</span>)</div>
+                    <div class="b-sign">ผู้รับเงิน ........................................<br>(นิธิรัชต์จักษุคลินิก)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SCRIPT ================= -->
+    <script>
+        let clinicMeds = [];
+
+        function loadMeds() {
+            const saved = localStorage.getItem('clinicMedsData');
+            if (saved) {
+                clinicMeds = JSON.parse(saved);
+            } else {
+                clinicMeds = [
+                    { name: 'Naphcon A', price: 150 },
+                    { name: 'Tears Naturale II', price: 180 },
+                    { name: 'Poly-Oph', price: 120 }
+                ];
+                saveMeds();
+            }
+            renderDatalist();
+            renderModalList();
+        }
+
+        function saveMeds() {
+            localStorage.setItem('clinicMedsData', JSON.stringify(clinicMeds));
+        }
+
+        function renderDatalist() {
+            const list = document.getElementById('medList');
+            while (list.firstChild) {
+                list.removeChild(list.firstChild);
+            }
+            clinicMeds.forEach(med => {
+                const option = document.createElement('option');
+                option.value = med.name;
+                list.appendChild(option);
+            });
+            document.querySelectorAll('.item-name').forEach(input => {
+                input.setAttribute('list', 'medList');
+            });
+        }
+
+        function renderModalList() {
+            const container = document.getElementById('uiMedList');
+            container.innerHTML = '';
+            if (clinicMeds.length === 0) {
+                container.innerHTML = '<div style="padding:15px; text-align:center; color:#94a3b8;">ยังไม่มีรายการยาในคลัง</div>';
+                return;
+            }
+            clinicMeds.forEach((med, index) => {
+                container.innerHTML += `
+                    <div class="med-item">
+                        <div><b>${med.name}</b> <span style="color:#10b981; margin-left:10px;">${med.price} ฿</span></div>
+                        <button type="button" class="btn-delete-med" onclick="deleteMed(${index})">🗑 ลบ</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addNewMed() {
+            const nameInput = document.getElementById('newMedName');
+            const priceInput = document.getElementById('newMedPrice');
+            const name = nameInput.value.trim();
+            const price = parseInt(priceInput.value) || 0;
+
+            if (name === '') { alert('กรุณาใส่ชื่อยาด้วยครับ!'); return; }
+            
+            const existingIndex = clinicMeds.findIndex(m => m.name.toLowerCase() === name.toLowerCase());
+            if (existingIndex >= 0) {
+                clinicMeds[existingIndex].price = price; 
+            } else {
+                clinicMeds.push({ name: name, price: price });
+            }
+            
+            saveMeds();
+            renderDatalist();
+            renderModalList();
+            
+            nameInput.value = '';
+            priceInput.value = '';
+            nameInput.focus();
+        }
+
+        function deleteMed(index) {
+            if(confirm('ต้องการลบยาตัวนี้ใช่ไหม?')) {
+                clinicMeds.splice(index, 1);
+                saveMeds();
+                renderDatalist(); 
+                renderModalList();
+            }
+        }
+
+        function openMedModal() { document.getElementById('medModal').style.display = 'flex'; }
+        function closeMedModal() { document.getElementById('medModal').style.display = 'none'; }
+
+        function handleMedSelection(inputElement) {
+            const typedName = inputElement.value;
+            const matchedMed = clinicMeds.find(m => m.name === typedName);
+            if (matchedMed) {
+                const row = inputElement.closest('.item-row');
+                const priceInput = row.querySelector('.item-price');
+                priceInput.value = matchedMed.price;
+            }
+        }
+
+        function formatDateInput(input, event) {
+            if (event && event.inputType === 'deleteContentBackward') return; 
+            let val = input.value.replace(/\D/g, ''); 
+            if (val.length > 2) val = val.substring(0, 2) + '/' + val.substring(2);
+            if (val.length > 5) val = val.substring(0, 5) + '/' + val.substring(5, 9);
+            input.value = val;
+        }
+
+        function getSecretNumber(char) {
+            const secretMap = {
+                'เ':'0', 'แ':'0', 'ไ':'0', 'ใ':'0', 'โ':'0', 'ะ':'0', 'า':'0', 'ำ':'0',
+                'ก':'1', 'ข':'1', 'ค':'1', 'ฅ':'1', 'ฆ':'1', 'ง':'2', 'จ':'2', 'ฉ':'2', 'ช':'2', 'ซ':'2',
+                'ฌ':'3', 'ญ':'3', 'ฎ':'3', 'ฏ':'3', 'ฐ':'3', 'ฑ':'3', 'ฒ':'3', 'ณ':'4', 'ด':'4', 'ต':'4', 'ถ':'4', 'ท':'4',
+                'ธ':'5', 'น':'5', 'บ':'5', 'ป':'5', 'ผ':'6', 'ฝ':'6', 'พ':'6', 'ฟ':'6', 'ภ':'6',
+                'ม':'7', 'ย':'7', 'ร':'7', 'ล':'7', 'ว':'8', 'ศ':'8', 'ษ':'8', 'ส':'8',
+                'ห':'9', 'ฬ':'9', 'อ':'9', 'ฮ':'9', 'ฤ':'9', 'ฦ':'9'
+            };
+            return secretMap[char]; 
+        }
+
+        function autoGenerateSecretCN() {
+            const fullName = document.getElementById('inputName').value.trim();
+            const cnInput = document.getElementById('inputCN');
+            if (fullName === '') { cnInput.value = ''; return; }
+            const parts = fullName.split(/\s+/);
+            let fName = parts[0] || '';
+            let lName = parts.slice(1).join('') || ''; 
+            let cnFirst = ''; let cnLast = '';
+            for (let char of fName) {
+                let num = getSecretNumber(char);
+                if (num !== undefined) { cnFirst += num; if (cnFirst.length >= 3) break; }
+            }
+            for (let char of lName) {
+                let num = getSecretNumber(char);
+                if (num !== undefined) { cnLast += num; if (cnLast.length >= 2) break; }
+            }
+            if (cnFirst || cnLast) { cnInput.value = 'CN-' + cnFirst + cnLast; } 
+            else { cnInput.value = ''; }
+        }
+
+        function initSetup() {
+            loadMeds();
+            const d = new Date();
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyyBE = d.getFullYear() + 543;
+            document.getElementById('inputDate').value = `${dd}/${mm}/${yyyyBE}`;
+            document.getElementById('inputNo').value = `P${yyyyBE.toString().substr(2)}${mm}${dd}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+            syncData();
+        }
+
+        function getPOSData() {
+            let items = [];
+            let total = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const name = row.querySelector('.item-name').value.trim();
+                const priceVal = row.querySelector('.item-price').value;
+                const price = parseFloat(priceVal) || 0;
+                if (name !== '' || priceVal !== '') {
+                    items.push({ name: name || '(ไม่ระบุ)', price: price });
+                    total += price;
+                }
+            });
+            return {
+                date: document.getElementById('inputDate').value || '-',
+                no: document.getElementById('inputNo').value || '-',
+                cn: document.getElementById('inputCN').value || '-',
+                name: document.getElementById('inputName').value || '...........................................',
+                items: items,
+                total: total
+            };
+        }
+
+        function copyToLine() {
+            const data = getPOSData();
+            let itemText = '';
+            if (data.items.length === 0) {
+                itemText = '- (ไม่มีรายการ)\n';
+            } else {
+                data.items.forEach(item => {
+                    itemText += `- ${item.name} (${item.price.toLocaleString()} ฿)\n`;
+                });
+            }
+            const summary = `🛒 ยอดขายยาหน้าร้าน\nวันที่: ${data.date}\nบิล: ${data.no}\nCN: ${data.cn}\nชื่อคนไข้: ${data.name}\n\nรายการ:\n${itemText}\n💰 ยอดรวม: ${data.total.toLocaleString()} บาท`;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(summary).then(() => showAlert("✅ คัดลอกยอดขายแล้ว!"));
+            } else {
+                let textArea = document.createElement("textarea");
+                textArea.value = summary;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try { document.execCommand('copy'); showAlert("✅ คัดลอกยอดขายแล้ว!"); } 
+                catch (err) { alert("❌ คัดลอกไม่สำเร็จ"); }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function showAlert(msg) {
+            const alertBox = document.getElementById('alertSuccess');
+            alertBox.innerText = msg;
+            alertBox.style.display = 'block';
+            setTimeout(() => alertBox.style.display = 'none', 3000);
+        }
+
+        function syncData() {
+            const dateVal = document.getElementById('inputDate').value || '-';
+            const noVal = document.getElementById('inputNo').value || '-';
+            const cnVal = document.getElementById('inputCN').value || '-';
+            let nameVal = document.getElementById('inputName').value.trim();
+            if (nameVal === '') nameVal = '...........................................';
+
+            document.querySelectorAll('.dispDate').forEach(el => el.innerText = dateVal);
+            document.querySelectorAll('.dispNo').forEach(el => el.innerText = noVal);
+            document.querySelectorAll('.dispCN').forEach(el => el.innerText = cnVal);
+            document.querySelectorAll('.dispName').forEach(el => el.innerText = nameVal);
+
+            let total = 0; let rowsHtml = '';
+            document.querySelectorAll('.item-row').forEach(row => {
+                const name = row.querySelector('.item-name').value.trim();
+                const priceVal = row.querySelector('.item-price').value;
+                const price = parseFloat(priceVal) || 0;
+                if (name !== '' || priceVal !== '') {
+                    let displayPrice = (priceVal === '') ? '-' : price.toLocaleString();
+                    rowsHtml += `<tr><td>${name}</td><td class="price-col">${displayPrice}</td></tr>`;
+                    total += price;
+                }
+            });
+            
+            if(rowsHtml === '') rowsHtml = '<tr><td>(ไม่มีรายการ)</td><td class="price-col">-</td></tr>';
+
+            document.querySelectorAll('.dispBillItems').forEach(el => el.innerHTML = rowsHtml);
+            document.querySelectorAll('.dispTotal').forEach(el => el.innerText = total.toLocaleString());
+            document.getElementById('uiTotal').innerText = total.toLocaleString();
+
+            const thaiText = ArabicNumberToText(total);
+            document.querySelectorAll('.dispThaiText').forEach(el => el.innerText = thaiText);
+        }
+
+        function setPrintPageStyle(size, orientation) {
+            let style = document.getElementById('dynamic-print-style');
+            if (!style) { style = document.createElement('style'); style.id = 'dynamic-print-style'; document.head.appendChild(style); }
+            style.innerHTML = `@page { size: ${size} ${orientation}; margin: 0; }`;
+        }
+
+        function printBill() { 
+            syncData(); setPrintPageStyle('A5', 'landscape'); window.print(); 
+        }
+
+        function resetForm() {
+            if(confirm("ต้องการล้างหน้าจอเพื่อรับคนไข้ใหม่หรือไม่?")) {
+                document.querySelectorAll('.item-name, .item-price, #inputName, #inputCN').forEach(i => i.value = '');
+                const d = new Date();
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yyyyBE = d.getFullYear() + 543;
+                document.getElementById('inputDate').value = `${dd}/${mm}/${yyyyBE}`;
+                document.getElementById('inputNo').value = `P${yyyyBE.toString().substr(2)}${mm}${dd}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+                syncData(); 
+            }
+        }
+
+        function ArabicNumberToText(Number) { var Number = CheckNumber(Number); var NumberArray = new Array("ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า", "สิบ"); var DigitArray = new Array("", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"); var BahtText = ""; if (isNaN(Number)) return "ข้อมูลไม่ถูกต้อง"; if ((Number - 0) > 9999999.9999) return "เกินขอบเขต"; Number = Number.split("."); if (Number[1].length > 0) Number[1] = Number[1].substring(0, 2); var NumberLen = Number[0].length - 0; for (var i = 0; i < NumberLen; i++) { var tmp = Number[0].substring(i, i + 1) - 0; if (tmp != 0) { if ((i == (NumberLen - 1)) && (tmp == 1)) BahtText += "เอ็ด"; else if ((i == (NumberLen - 2)) && (tmp == 2)) BahtText += "ยี่"; else if ((i == (NumberLen - 2)) && (tmp == 1)) BahtText += ""; else BahtText += NumberArray[tmp]; BahtText += DigitArray[NumberLen - i - 1]; } } BahtText += "บาท"; if ((Number[1] == "0") || (Number[1] == "00")) BahtText += "ถ้วน"; else { DecimalLen = Number[1].length - 0; for (var i = 0; i < DecimalLen; i++) { var tmp = Number[1].substring(i, i + 1) - 0; if (tmp != 0) { if ((i == (DecimalLen - 1)) && (tmp == 1)) BahtText += "เอ็ด"; else if ((i == (DecimalLen - 2)) && (tmp == 2)) BahtText += "ยี่"; else if ((i == (DecimalLen - 2)) && (tmp == 1)) BahtText += ""; else BahtText += NumberArray[tmp]; BahtText += DigitArray[DecimalLen - i - 1]; } } BahtText += "สตางค์"; } return BahtText; }
+        function CheckNumber(Number) { var decimal = false; Number = Number.toString(); Number = Number.replace(/ |,|บาท|฿/gi, ''); for (var i = 0; i < Number.length; i++) if (Number[i] == '.') decimal = true; if (decimal == false) Number = Number + '.00'; return Number; }
+
+        window.onload = initSetup;
+    </script>
+</body>
+</html>
+
