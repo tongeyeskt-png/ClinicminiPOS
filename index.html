@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="POS คลินิก">
     
-    <!-- เปลี่ยนไอคอนเป็นรูปแคปซูลยา 💊 -->
+    <!-- ไอคอนแคปซูลยา 💊 -->
     <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%23f97316'/><g transform='rotate(45 50 50)'><rect x='30' y='20' width='40' height='60' rx='20' fill='none' stroke='white' stroke-width='8'/><path d='M 30 50 L 30 40 A 20 20 0 0 1 70 40 L 70 50 Z' fill='white'/></g></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f97316'/><g transform='rotate(45 50 50)'><rect x='30' y='20' width='40' height='60' rx='20' fill='none' stroke='white' stroke-width='8'/><path d='M 30 50 L 30 40 A 20 20 0 0 1 70 40 L 70 50 Z' fill='white'/></g></svg>">
 
@@ -37,10 +37,13 @@
         .highlight-input { background: #fff7ed !important; color: #ea580c !important; border-color: #ffedd5 !important; font-weight: bold;}
         .flex-row { display: flex; gap: 15px; flex-wrap: wrap; }
         .flex-1 { flex: 1; min-width: 150px; }
+        
+        /* ปรับ Layout ให้มีช่องจำนวนเพิ่มเข้ามา */
         .item-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
         .item-index { font-weight: bold; color: #94a3b8; width: 20px; text-align: center; }
-        .item-name { flex: 3; }
-        .item-price { flex: 1; }
+        .item-name { flex: 3; min-width: 120px; }
+        .item-qty { flex: 1; min-width: 60px; text-align: center; }
+        .item-price { flex: 1.5; min-width: 90px; }
         
         .btn-group { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;}
         .btn { flex: 1; min-width: 180px; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -50,7 +53,7 @@
         .btn-bill { background: linear-gradient(135deg, #f97316, #ea580c); }
         .btn-clear { background: linear-gradient(135deg, #94a3b8, #64748b); flex: 0.3; min-width: 120px;}
         .alert-box { display: none; background-color: #dcfce7; color: #166534; padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-weight: bold; border: 1px solid #bbf7d0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .total-box { background: #fff7ed; border: 2px dashed #fdba74; padding: 15px 20px; border-radius: 12px; text-align: right; margin-top: 20px; }
+        .total-box { background: #fff7ed; border: 2px dashed #fdba74; padding: 15px 20px; border-radius: 12px; text-align: right; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
         .total-text { font-size: 16px; color: #ea580c; font-weight: 600; }
         .total-amount { font-size: 32px; font-weight: 700; color: #c2410c; margin-left: 10px; }
 
@@ -87,6 +90,7 @@
         .b-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 10px; flex: 1; }
         .b-table th { border-bottom: 1px solid #000; padding: 4px 0; text-align: left; }
         .b-table td { padding: 4px 0; }
+        .b-table .qty-col { text-align: center; width: 40px; }
         .b-table .price-col { text-align: right; width: 60px; }
         .b-total-row { border-top: 2px solid #000; font-weight: bold; font-size: 14px; }
         .b-thai-text { text-align: right; font-size: 10px; font-style: italic; margin-top: 5px; color: #555; }
@@ -102,7 +106,7 @@
 </head>
 <body>
 
-    <!-- ซ่อนรายชื่อยาไว้เบื้องหลัง -->
+    <!-- ซ่อนรายชื่อยาไว้เบื้องหลัง (Datalist จะถูกสร้างใหม่เรื่อยๆ) -->
     <datalist id="medList"></datalist>
 
     <div class="app-container">
@@ -136,17 +140,49 @@
 
         <div class="section-box">
             <div class="section-title"><span class="badge-orange">2</span> <span>รายการสินค้า / ยา</span></div>
+            <!-- อธิบายหัวตารางให้พนักงานเข้าใจง่ายๆ -->
+            <div style="display: flex; gap: 10px; margin-bottom: 5px; padding-left: 30px; font-size: 12px; color: #64748b; font-weight: bold;">
+                <div style="flex: 3; min-width: 120px;">ชื่อยา / สินค้า</div>
+                <div style="flex: 1; min-width: 60px; text-align: center;">จำนวน</div>
+                <div style="flex: 1.5; min-width: 90px; padding-left: 5px;">ราคา/หน่วย (บาท)</div>
+            </div>
+            
             <div id="itemsContainer">
-                <div class="item-row"><span class="item-index">1.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
-                <div class="item-row"><span class="item-index">2.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
-                <div class="item-row"><span class="item-index">3.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
-                <div class="item-row"><span class="item-index">4.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
-                <div class="item-row"><span class="item-index">5.</span><input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา หรือคลิกเพื่อเลือก" oninput="handleMedSelection(this); syncData()"><input type="number" class="item-price" placeholder="ราคา (บาท)" oninput="syncData()"></div>
+                <div class="item-row">
+                    <span class="item-index">1.</span>
+                    <input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา..." oninput="handleMedSelection(this); syncData()">
+                    <input type="number" class="item-qty" placeholder="จำนวน" value="1" min="1" oninput="syncData()">
+                    <input type="number" class="item-price" placeholder="ราคา/หน่วย" oninput="syncData()">
+                </div>
+                <div class="item-row">
+                    <span class="item-index">2.</span>
+                    <input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา..." oninput="handleMedSelection(this); syncData()">
+                    <input type="number" class="item-qty" placeholder="จำนวน" value="1" min="1" oninput="syncData()">
+                    <input type="number" class="item-price" placeholder="ราคา/หน่วย" oninput="syncData()">
+                </div>
+                <div class="item-row">
+                    <span class="item-index">3.</span>
+                    <input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา..." oninput="handleMedSelection(this); syncData()">
+                    <input type="number" class="item-qty" placeholder="จำนวน" value="1" min="1" oninput="syncData()">
+                    <input type="number" class="item-price" placeholder="ราคา/หน่วย" oninput="syncData()">
+                </div>
+                <div class="item-row">
+                    <span class="item-index">4.</span>
+                    <input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา..." oninput="handleMedSelection(this); syncData()">
+                    <input type="number" class="item-qty" placeholder="จำนวน" value="1" min="1" oninput="syncData()">
+                    <input type="number" class="item-price" placeholder="ราคา/หน่วย" oninput="syncData()">
+                </div>
+                <div class="item-row">
+                    <span class="item-index">5.</span>
+                    <input type="text" class="item-name" list="medList" placeholder="พิมพ์ชื่อยา..." oninput="handleMedSelection(this); syncData()">
+                    <input type="number" class="item-qty" placeholder="จำนวน" value="1" min="1" oninput="syncData()">
+                    <input type="number" class="item-price" placeholder="ราคา/หน่วย" oninput="syncData()">
+                </div>
             </div>
             
             <div class="total-box">
-                <span class="total-text">ยอดรวมทั้งสิ้น:</span>
-                <span class="total-amount" id="uiTotal">0</span> <span class="total-text">บาท</span>
+                <div><span class="total-text">ยอดรวมทั้งสิ้น:</span></div>
+                <div><span class="total-amount" id="uiTotal">0</span> <span class="total-text">บาท</span></div>
             </div>
         </div>
 
@@ -163,11 +199,11 @@
         <div class="modal-content">
             <button type="button" class="modal-close" onclick="closeMedModal()">✖</button>
             <h2 style="margin-top:0; color:#ea580c;">⚙️ จัดการคลังยา (เพิ่ม/ลบ)</h2>
-            <p style="color:#64748b; font-size:14px;">เพิ่มชื่อยาและราคาไว้ล่วงหน้า พิมพ์ปุ๊บ ราคาเด้งปั๊บ!</p>
+            <p style="color:#64748b; font-size:14px;">เพิ่มชื่อยาและราคาต่อขวดไว้ล่วงหน้า พิมพ์ปุ๊บ ราคาเด้งปั๊บ!</p>
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <input type="text" id="newMedName" placeholder="ชื่อยา (เช่น Naphcon A)" style="flex: 2;">
-                <input type="number" id="newMedPrice" placeholder="ราคา" style="flex: 1;">
+                <input type="number" id="newMedPrice" placeholder="ราคา/ขวด" style="flex: 1;">
                 <button type="button" class="btn-add-med" onclick="addNewMed()">+ เพิ่ม</button>
             </div>
 
@@ -198,11 +234,11 @@
                         <div class="b-patient-sub"><b>CN:</b> <span class="dispCN"></span></div>
                     </div>
                     <table class="b-table">
-                        <thead><tr><th>รายการสินค้า (Description)</th><th class="price-col">จำนวนเงิน</th></tr></thead>
+                        <thead><tr><th>รายการสินค้า (Description)</th><th class="qty-col">จำนวน</th><th class="price-col">รวมเงิน</th></tr></thead>
                         <tbody class="dispBillItems"></tbody>
                         <tbody>
-                            <tr><td colspan="2" style="border-top: 1px solid #000; padding:2px;"></td></tr>
-                            <tr class="b-total-row"><td>รวมเป็นเงินทั้งสิ้น</td><td class="price-col dispTotal">0</td></tr>
+                            <tr><td colspan="3" style="border-top: 1px solid #000; padding:2px;"></td></tr>
+                            <tr class="b-total-row"><td colspan="2">รวมเป็นเงินทั้งสิ้น</td><td class="price-col dispTotal">0</td></tr>
                         </tbody>
                     </table>
                     <div class="b-thai-text">(<span class="dispThaiText">ศูนย์บาทถ้วน</span>)</div>
@@ -225,11 +261,11 @@
                         <div class="b-patient-sub"><b>CN:</b> <span class="dispCN"></span></div>
                     </div>
                     <table class="b-table">
-                        <thead><tr><th>รายการสินค้า (Description)</th><th class="price-col">จำนวนเงิน</th></tr></thead>
+                        <thead><tr><th>รายการสินค้า (Description)</th><th class="qty-col">จำนวน</th><th class="price-col">รวมเงิน</th></tr></thead>
                         <tbody class="dispBillItems"></tbody>
                         <tbody>
-                            <tr><td colspan="2" style="border-top: 1px solid #000; padding:2px;"></td></tr>
-                            <tr class="b-total-row"><td>รวมเป็นเงินทั้งสิ้น</td><td class="price-col dispTotal">0</td></tr>
+                            <tr><td colspan="3" style="border-top: 1px solid #000; padding:2px;"></td></tr>
+                            <tr class="b-total-row"><td colspan="2">รวมเป็นเงินทั้งสิ้น</td><td class="price-col dispTotal">0</td></tr>
                         </tbody>
                     </table>
                     <div class="b-thai-text">(<span class="dispThaiText">ศูนย์บาทถ้วน</span>)</div>
@@ -288,7 +324,7 @@
             clinicMeds.forEach((med, index) => {
                 container.innerHTML += `
                     <div class="med-item">
-                        <div><b>${med.name}</b> <span style="color:#10b981; margin-left:10px;">${med.price} ฿</span></div>
+                        <div><b>${med.name}</b> <span style="color:#10b981; margin-left:10px;">${med.price} ฿/ขวด</span></div>
                         <button type="button" class="btn-delete-med" onclick="deleteMed(${index})">🗑 ลบ</button>
                     </div>
                 `;
@@ -337,7 +373,10 @@
             if (matchedMed) {
                 const row = inputElement.closest('.item-row');
                 const priceInput = row.querySelector('.item-price');
+                const qtyInput = row.querySelector('.item-qty');
+                
                 priceInput.value = matchedMed.price;
+                if(qtyInput.value === '') qtyInput.value = '1'; // ใส่จำนวนเป็น 1 ให้เลยถ้ายังว่างอยู่
             }
         }
 
@@ -397,11 +436,16 @@
             let total = 0;
             document.querySelectorAll('.item-row').forEach(row => {
                 const name = row.querySelector('.item-name').value.trim();
+                const qtyVal = row.querySelector('.item-qty').value;
                 const priceVal = row.querySelector('.item-price').value;
+                
+                const qty = parseInt(qtyVal) || 0;
                 const price = parseFloat(priceVal) || 0;
+                const rowTotal = qty * price; // คณูหาผลรวมแต่ละบรรทัด
+
                 if (name !== '' || priceVal !== '') {
-                    items.push({ name: name || '(ไม่ระบุ)', price: price });
-                    total += price;
+                    items.push({ name: name || '(ไม่ระบุ)', qty: qty, price: price, rowTotal: rowTotal });
+                    total += rowTotal;
                 }
             });
             return {
@@ -421,7 +465,8 @@
                 itemText = '- (ไม่มีรายการ)\n';
             } else {
                 data.items.forEach(item => {
-                    itemText += `- ${item.name} (${item.price.toLocaleString()} ฿)\n`;
+                    // โชว์ใน LINE แบบ: - Naphcon A x 2 (300 ฿)
+                    itemText += `- ${item.name} x ${item.qty} (${item.rowTotal.toLocaleString()} ฿)\n`;
                 });
             }
             const summary = `🛒 ยอดขายยาหน้าร้าน\nวันที่: ${data.date}\nบิล: ${data.no}\nCN: ${data.cn}\nชื่อคนไข้: ${data.name}\n\nรายการ:\n${itemText}\n💰 ยอดรวม: ${data.total.toLocaleString()} บาท`;
@@ -461,16 +506,23 @@
             let total = 0; let rowsHtml = '';
             document.querySelectorAll('.item-row').forEach(row => {
                 const name = row.querySelector('.item-name').value.trim();
+                const qtyVal = row.querySelector('.item-qty').value;
                 const priceVal = row.querySelector('.item-price').value;
+                
+                const qty = parseInt(qtyVal) || 0;
                 const price = parseFloat(priceVal) || 0;
+                const rowTotal = qty * price;
+
                 if (name !== '' || priceVal !== '') {
-                    let displayPrice = (priceVal === '') ? '-' : price.toLocaleString();
-                    rowsHtml += `<tr><td>${name}</td><td class="price-col">${displayPrice}</td></tr>`;
-                    total += price;
+                    let displayQty = qty > 0 ? qty : '-';
+                    let displayTotal = (rowTotal === 0 && priceVal === '') ? '-' : rowTotal.toLocaleString();
+                    
+                    rowsHtml += `<tr><td>${name}</td><td class="qty-col">${displayQty}</td><td class="price-col">${displayTotal}</td></tr>`;
+                    total += rowTotal;
                 }
             });
             
-            if(rowsHtml === '') rowsHtml = '<tr><td>(ไม่มีรายการ)</td><td class="price-col">-</td></tr>';
+            if(rowsHtml === '') rowsHtml = '<tr><td colspan="3">(ไม่มีรายการ)</td></tr>';
 
             document.querySelectorAll('.dispBillItems').forEach(el => el.innerHTML = rowsHtml);
             document.querySelectorAll('.dispTotal').forEach(el => el.innerText = total.toLocaleString());
@@ -493,6 +545,7 @@
         function resetForm() {
             if(confirm("ต้องการล้างหน้าจอเพื่อรับคนไข้ใหม่หรือไม่?")) {
                 document.querySelectorAll('.item-name, .item-price, #inputName, #inputCN').forEach(i => i.value = '');
+                document.querySelectorAll('.item-qty').forEach(i => i.value = '1'); // รีเซ็ตจำนวนให้กลับมาเป็น 1
                 const d = new Date();
                 const dd = String(d.getDate()).padStart(2, '0');
                 const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -510,4 +563,5 @@
     </script>
 </body>
 </html>
+
 
